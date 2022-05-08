@@ -1,19 +1,19 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
 
-import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 
 const BlogIndex = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
+  //const posts = data.allMarkdownRemark.nodes
+
+  const posts = data.allMarkdownRemark.nodes.filter(n => !n.frontmatter.draft)
 
   if (posts.length === 0) {
     return (
       <Layout location={location} title={siteTitle}>
         <Seo title="All posts" />
-        <Bio />
         <p>
           No blog posts found. Add markdown posts to "content/blog" (or the
           directory you specified for the "gatsby-source-filesystem" plugin in
@@ -26,7 +26,6 @@ const BlogIndex = ({ data, location }) => {
   return (
     <Layout location={location} title={siteTitle}>
       <Seo title="All posts" />
-      <Bio />
       <ol style={{ listStyle: `none` }}>
         {posts.map(post => {
           const title = post.frontmatter.title || post.fields.slug
@@ -42,9 +41,16 @@ const BlogIndex = ({ data, location }) => {
                   <h2>
                     <Link to={post.fields.slug} itemProp="url">
                       <span itemProp="headline">{title}</span>
+                      <small className="small-post-item-date">
+                        {" - "}
+                        {post.frontmatter.date}
+                      </small>{" "}
                     </Link>
                   </h2>
-                  <small>{post.frontmatter.date}</small>
+                  <p className="reading-time">
+                    &#9749; {post.timeToRead}{" "}
+                    {post.timeToRead <= 1 ? "minute" : "minutes"}
+                  </p>
                 </header>
                 <section>
                   <p
@@ -82,7 +88,9 @@ export const pageQuery = graphql`
           date(formatString: "MMMM DD, YYYY")
           title
           description
+          draft
         }
+        timeToRead
       }
     }
   }

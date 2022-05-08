@@ -73,7 +73,21 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 }
 
 exports.createSchemaCustomization = ({ actions }) => {
-  const { createTypes } = actions
+  const { createTypes, createFieldExtension } = actions
+
+  createFieldExtension({
+    name: "defaultFalse",
+    extend() {
+      return {
+        resolve(source, args, context, info) {
+          if (source[info.fieldName] == null) {
+            return false
+          }
+          return source[info.fieldName]
+        },
+      }
+    },
+  })
 
   // Explicitly define the siteMetadata {} object
   // This way those will always be defined even if removed from gatsby-config.js
@@ -106,6 +120,7 @@ exports.createSchemaCustomization = ({ actions }) => {
       title: String
       description: String
       date: Date @dateformat
+      draft: Boolean @defaultFalse
     }
 
     type Fields {
